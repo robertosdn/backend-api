@@ -16,11 +16,11 @@ Eles serao removidos quando as primeiras features reais do backend estiverem imp
 ## Arquitetura
 
 - **CQRS**: commands alteram o write model; queries consultam o read model.
-- **MySQL/InnoDB**: write model e fonte de verdade.
+- **MySQL 9.7.2 / InnoDB**: write model e fonte de verdade.
 - **Transactional Outbox**: uma outbox propria para cada tabela de dominio que produzir eventos.
-- **RabbitMQ**: transporte de eventos apos o commit.
-- **Elasticsearch**: read model exclusivo das queries, inclusive consultas por id.
-- **Redis**: somente sessoes, tokens revogados, rate limiting e dados temporarios; nao participa das queries de usuarios.
+- **RabbitMQ 4.3.6**: transporte de eventos apos o commit.
+- **Elasticsearch 9.5.4**: read model exclusivo das queries, inclusive consultas por id.
+- **Redis 8.8**: somente sessoes, tokens revogados, rate limiting e dados temporarios; nao participa das queries de usuarios.
 - **Docker**: ambiente padrao para build, testes e execucao.
 
 O fluxo de desenvolvimento e:
@@ -31,7 +31,15 @@ spec -> plan -> tasks -> implementation -> tests -> update docs
 
 ## Executar Com Docker
 
-Iniciar o servico atual:
+A stack completa do backend deve subir via Docker Compose, incluindo os servicos de banco, fila, busca, cache, configuracoes de bootstrap e os scripts de inicializacao necessarios para que o ambiente local fique funcional desde o primeiro `up`.
+
+Subir toda a stack de desenvolvimento:
+
+```bash
+docker compose up --build
+```
+
+Subir apenas o servico HTTP atual:
 
 ```bash
 docker compose up --build rest-server
@@ -45,6 +53,15 @@ docker compose --profile test run --rm rest-test
 ```
 
 A API atual fica disponivel em `http://localhost:8080`.
+
+### Bootstrap no Docker Compose
+
+- As migracoes SQL do MySQL devem ficar em `migrations/*.sql` e ser versionadas no repositorio.
+- O ambiente Docker Compose deve incluir inicializacao automatica para MySQL, RabbitMQ e Elasticsearch antes da API ficar pronta para uso.
+- O bootstrap do RabbitMQ deve criar exchange, fila e bindings basicos para o fluxo da outbox.
+- O bootstrap do Elasticsearch deve criar indices e mappings iniciais, como `access_users`, sem depender do app para criar o schema em runtime.
+- O bootstrap da stack deve garantir que `access_users`, `access_users_outbox`, fila de eventos e indice de consulta sejam criados automaticamente ao subir a infraestrutura.
+- A aplicacao nao deve depender de SQL gerado em runtime em handlers HTTP; a schema deve ser aplicada por migracao reproducivel.
 
 ## Desenvolvimento Orientado Por Especificacao
 

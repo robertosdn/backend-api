@@ -44,3 +44,16 @@ async fn echoes_body_and_rejects_unknown_routes() {
     assert_eq!(status, StatusCode::NOT_FOUND);
     assert_eq!(body, "Not Found\n");
 }
+
+#[tokio::test]
+async fn creates_access_user_with_valid_data_and_hides_password_hash() {
+    let payload = r#"{"name":"Alice Silva","email":"alice@example.com","password":"S3cret!Pass123"}"#;
+    let (status, body) = request(app(), Method::POST, "/api/v1/access-users", Body::from(payload)).await;
+
+    assert_eq!(status, StatusCode::CREATED, "body: {body}");
+    assert!(body.contains("\"id\""));
+    assert!(body.contains("\"email\":\"alice@example.com\""));
+    assert!(body.contains("\"name\":\"Alice Silva\""));
+    assert!(!body.contains("password_hash"));
+    assert!(!body.contains("S3cret!Pass123"));
+}

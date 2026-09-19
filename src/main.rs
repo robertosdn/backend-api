@@ -1,4 +1,4 @@
-use rest_api_rust::app;
+use backend_api::app;
 use std::net::SocketAddr;
 
 #[tokio::main]

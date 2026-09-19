@@ -50,6 +50,7 @@ src/
 - Commands aceitam apenas DTOs de entrada validos e retornam `Result<..., DomainError>` ou `Result<AccessUserId, ApplicationError>`.
 - Queries retornam views publicas do read model, sem efeitos colaterais e sem acesso ao write model.
 - Repositórios de escrita expõem `insert`, `update`, `find_by_id`, `find_by_email`, `save_event` e operam dentro de unidade transacional com outbox.
+- A tabela `access_users_outbox` registra os eventos do aggregate com `id`, `aggregate_id`, `event_type`, `payload`, `status`, `attempts`, `available_at`, `created_at`, `published_at` e `last_error`, em uma transacao compartilhada com o usuario.
 - Repositórios de leitura consultam o Elasticsearch e nunca fazem fallback para MySQL em consultas normais.
 - Autenticacao e autorizacao sao camadas separadas: login valida senha e emissao de token; middleware/guard valida `sub`, `role` e escopos por request.
 
@@ -61,9 +62,11 @@ src/
 4. Criar o modelo da outbox e a unidade transacional que grava usuario e evento atomicamente.
 5. Implementar criacao, alteracao e consultas de usuarios com testes unitarios e de integracao.
 6. Implementar login com verificacao segura de senha, credencial de sessao/token e respostas que evitem enumeracao.
-7. Implementar o processador da outbox com retry, backoff, idempotencia e observabilidade.
-8. Atualizar Docker Compose com banco e demais dependencias necessarias e validar pelo perfil de testes.
-9. Remover `hello` e `echo` do router e retirar seus testes somente apos os endpoints reais estarem cobertos.
+7. Implementar o processador da outbox com retry, backoff, idempotencia e observabilidade, com selecao de eventos pendentes, tentativa de publicacao no RabbitMQ, marcacao de erro e reprocessamento controlado.
+8. Implementar o projetor RabbitMQ -> Elasticsearch para materializar o read model dos usuarios sem consultas ao MySQL em queries normais.
+9. Implementar reindexacao de emergencia do Elasticsearch a partir do MySQL em batch, mantendo o caminho normal das queries somente no Elasticsearch.
+10. Atualizar Docker Compose com banco e demais dependencias necessarias, aplicar migracoes SQL em bootstrap e validar pelo perfil de testes.
+11. Remover `hello` e `echo` do router e retirar seus testes somente apos os endpoints reais estarem cobertos.
 
 ## Nao Escopo
 

@@ -13,15 +13,19 @@
 ## Persistencia E Outbox
 
 - [x] Criar migracao/tabela de usuarios sem armazenar senha em texto puro.
-- [ ] Criar tabela transacional de outbox por tabela de dominio, com status, tentativas e timestamps.
-- [ ] Implementar unidade transacional para usuario e evento.
-- [ ] Implementar processador da outbox com retry, backoff e idempotencia.
-- [ ] Implementar projetor RabbitMQ -> Elasticsearch.
-- [ ] Implementar reindexacao do Elasticsearch a partir do MySQL sem usar MySQL no caminho normal das queries.
+- [x] Criar tabela transacional de outbox por tabela de dominio, com status, tentativas e timestamps.
+- [x] Implementar unidade transacional para usuario e evento.
+- [x] Documentar e configurar stack Docker Compose para subir infraestrutura e aplicar migrações SQL no bootstrap.
+- [x] Documentar processador da outbox com retry, backoff e idempotencia.
+- [x] Implementar processador da outbox com retry, backoff e idempotencia.
+- [x] Documentar projetor RabbitMQ -> Elasticsearch.
+- [x] Implementar projetor RabbitMQ -> Elasticsearch.
+- [x] Documentar reindexacao do Elasticsearch a partir do MySQL sem usar MySQL no caminho normal das queries.
+- [x] Implementar reindexacao do Elasticsearch a partir do MySQL sem usar MySQL no caminho normal das queries.
 
 ## Endpoints E Casos De Uso
 
-- [ ] Implementar `POST /api/v1/access-users`.
+- [ ] Implementar `POST /api/v1/access-users` com validacao de email, nome e senha; email unico, hash Argon2id, evento transacional na outbox e resposta sem `password_hash`.
 - [ ] Implementar `PATCH /api/v1/access-users/{id}`.
 - [ ] Implementar `GET /api/v1/access-users/{id}`.
 - [ ] Implementar `GET /api/v1/access-users` com paginacao.

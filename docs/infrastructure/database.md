@@ -6,7 +6,7 @@ Aprovada para a primeira implementacao persistente.
 
 ## Escolha
 
-- Banco: MySQL.
+- Banco: MySQL 9.7.2.
 - Storage engine: InnoDB em todas as tabelas de dominio e outbox.
 - Charset: `utf8mb4`.
 - Collation: definir explicitamente por ambiente, preferindo uma collation `utf8mb4` deterministica.
@@ -22,6 +22,27 @@ Aprovada para a primeira implementacao persistente.
 - Senhas devem ser armazenadas somente como hash.
 - Datas devem usar uma convencao UTC documentada.
 - Alteracoes de schema devem ser versionadas por migracoes reproduziveis.
+
+## Migrações E Bootstrap Com Docker Compose
+
+A stack deve ser iniciada por `docker compose up --build`, e o ambiente deve incluir a aplicacao das migracoes SQL antes da API ficar pronta para uso.
+
+Estrutura esperada:
+
+```text
+migrations/
+  001_create_access_users.sql
+  002_create_access_users_outbox.sql
+```
+
+O processo de bootstrap deve garantir que:
+
+- o MySQL suba com volume persistente;
+- os scripts SQL sejam aplicados em ordem numerada;
+- tabelas de dominio e outbox sejam criadas no mesmo ambiente reproduzivel;
+- a API e os demais servicos esperem a inicializacao completa do banco antes de receber trafego.
+
+As migracoes devem ser versionadas no repositorio e executadas por um job de init ou por um container de migracao no `docker-compose.yml`.
 
 ## Outbox Por Tabela
 

@@ -17,6 +17,16 @@ Query   -> Elasticsearch
 
 O consumidor deve projetar os eventos da outbox no indice correspondente depois que o commit do MySQL for concluido. A entrega e a projecao devem ser idempotentes usando o identificador do evento e a versao do agregado.
 
+## Bootstrap Local Com Docker Compose
+
+O ambiente local deve subir com `docker compose up --build` e o Elasticsearch deve iniciar com o indice basico da API predefinido:
+
+- indice `access_users`
+- mappings para `id`, `email`, `name`, `status`, `version`, `created_at` e `updated_at`
+- shards em 1 e replicas em 0 para ambiente local
+
+A criacao do indice deve ocorrer em um passo de bootstrap do Docker Compose, para que a API encontre o read model pronto no primeiro uso, sem necessidade de criar o mapeamento manualmente.
+
 ## Regras
 
 - Queries nao podem consultar MySQL como fallback.

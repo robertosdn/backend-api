@@ -81,7 +81,11 @@ A resposta HTTP nunca deve expor `password_hash`.
 
 Commands alteram estado no MySQL e queries somente leem o read model no Elasticsearch. Queries nunca devem consultar MySQL como fallback. A criacao, alteracao, desativacao e eventos de seguranca devem usar uma unidade transacional. A escrita do usuario e o registro do evento na outbox devem ser confirmados atomicamente.
 
-O processador da outbox deve publicar eventos com entrega at-least-once, retry com backoff e comportamento idempotente. Um projetor deve aplicar os eventos no Elasticsearch. Consumidores devem aceitar duplicatas usando o identificador do evento.
+O processador da outbox deve publicar eventos com entrega at-least-once, retry com backoff e comportamento idempotente. O algoritmo deve seguir: selecionar eventos `pending` e `available_at <= now`, tentar publicar no RabbitMQ, registrar tentativa e, em caso de erro, aumentar `attempts`, calcular delay exponencial e marcar `last_error`. Eventos com sucesso devem ser marcados como `published` e manter idempotencia pelo `event_id` para evitar duplicacao em reprocessamento.
+
+O projetor RabbitMQ -> Elasticsearch deve consumir os eventos publicadas por aggregate de usuario e aplicar as alteracoes no read model, preservando `id`, `email`, `name`, `status`, `version` e timestamps. A indexacao deve ser idempotente por `id` do usuario e nunca depender de consultas ao MySQL. Consumidores devem aceitar duplicatas usando o identificador do evento.
+
+A reindexacao do Elasticsearch a partir do MySQL e uma operacao de infraestrutura e manutencao, nao parte do caminho de leitura normal da API. Quando o read model precisar ser reconstruido, um job de reindexacao consulta o MySQL em batch, reescreve os documentos no Elasticsearch e invalida ou substitui os indices relevantes. As queries da API continuam 100% no Elasticsearch e nunca consultam MySQL como fallback.
 
 ## Modulos E Contratos
 
@@ -125,12 +129,50 @@ CREATE TABLE access_users (
 ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
+A tabela MySQL `access_users_outbox` deve registrar cada evento gerado pela escrita do usuario na mesma transacao:
+
+```sql
+CREATE TABLE access_users_outbox (
+  id BINARY(16) PRIMARY KEY,
+  aggregate_id BINARY(16) NOT NULL,
+  event_type VARCHAR(100) NOT NULL,
+  payload JSON NOT NULL,
+  status ENUM('pending', 'published', 'failed') NOT NULL DEFAULT 'pending',
+  attempts INT NOT NULL DEFAULT 0,
+  available_at DATETIME(6) NOT NULL,
+  created_at DATETIME(6) NOT NULL,
+  published_at DATETIME(6) NULL,
+  last_error VARCHAR(1000) NULL,
+  KEY ix_access_users_outbox_status_available (status, available_at)
+) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
 Regras de dominio:
 
 - O email e unico no conjunto de usuarios ativos e inativos e deve ser consultado em forma normalizada.
 - O status `disabled` bloqueia login e desabilita operacoes de autenticacao, mas nao remove o registro.
 - `PATCH` de usuario deve atualizar `updated_at` e incrementar `version` somente quando houver mudanca relevante.
 - Operacoes de escrita devem rejeitar condicoes de concorrencia quando `version` informado pelo cliente divergir do registro em banco.
+
+## Unidade Transacional De Usuario E Evento
+
+A alteracao do aggregate `AccessUser` e o registro do evento na outbox devem acontecer dentro da mesma transacao InnoDB. O contrato de integracao deve ser:
+
+```text
+begin transaction
+  insert/update access_users
+  insert access_users_outbox
+commit
+```
+
+Se qualquer etapa falhar, a transacao inteira deve ser revertida. Em termos de desenho da aplicacao:
+
+- o command handler valida a entrada e cria o evento de dominio;
+- o repository de escrita persiste a entidade e o registro da outbox na mesma unidade transacional;
+- o processador da outbox somente publica eventos apos o commit bem-sucedido;
+- a API nao publica eventos fora da transacao, nem grava eventos de dominio em handlers HTTP.
+
+Isso garante consistencia entre estado e integraçao, sem permitir que o usuario seja alterado sem que um evento validado tenha sido registrado.
 
 ## Seguranca
 

@@ -8,7 +8,7 @@ As rotas atuais `hello` e `echo` sao endpoints de demonstracao e estao marcadas 
 
 O Dockerfile possui uma etapa `test`, que executa `cargo test`, e uma etapa `production`, que compila o binario release. O Docker Compose expoe o servico em `8080` e possui um perfil `test` para a imagem de testes.
 
-A infraestrutura aprovada esta definida em `docs/decisions/adr-001-infrastructure-stack.md`: MySQL com InnoDB e `utf8mb4` como write model, RabbitMQ como broker, Elasticsearch como read model e Redis somente para sessoes e dados temporarios.
+A infraestrutura aprovada esta definida em `docs/decisions/adr-001-infrastructure-stack.md`: MySQL 9.7.2 com InnoDB e `utf8mb4` como write model, RabbitMQ 4.3.6 como broker, Elasticsearch 9.5.4 como read model e Redis 8.8 somente para sessoes e dados temporarios.
 
 ## Direcao Arquitetural
 

@@ -25,6 +25,17 @@ MySQL domain table + table_outbox
 
 O processador somente deve publicar registros apos o commit da transacao que os criou. Depois de uma confirmacao de publicacao, o registro da outbox pode ser marcado como publicado.
 
+## Bootstrap Local Com Docker Compose
+
+O ambiente local deve subir com `docker compose up --build` e o RabbitMQ deve já iniciar com a configuracao basica do broker:
+
+- exchange `access_users.events`
+- fila `access_users.events.queue`
+- binding entre exchange e fila
+- usuario administrativo padrao `guest` para ambiente local
+
+A configuracao deve estar versionada em `rabbitmq/rabbitmq.conf` e `rabbitmq/definitions.json`, e nao depender de execucao manual apos a subida do contêiner.
+
 ## Regras
 
 - Usar publisher confirms.
