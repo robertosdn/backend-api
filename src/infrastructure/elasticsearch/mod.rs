@@ -1,1 +1,3 @@
-pub struct ElasticsearchAccessUserReadRepository;
+pub mod elasticsearch_access_user_read_repository;
+
+pub use elasticsearch_access_user_read_repository::ElasticsearchAccessUserReadRepository;

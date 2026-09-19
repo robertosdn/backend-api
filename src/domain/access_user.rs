@@ -1,4 +1,11 @@
-use super::{access_user_status::AccessUserStatus, value_objects::{DisplayName, EmailAddress}};
+pub mod events;
+pub mod status;
+pub mod value_objects;
+
+use self::{
+    status::AccessUserStatus,
+    value_objects::{DisplayName, EmailAddress},
+};
 
 #[derive(Debug, Clone)]
 pub struct AccessUser {
@@ -13,7 +20,22 @@ pub struct AccessUser {
 }
 
 impl AccessUser {
-    pub fn new(id: String, email: EmailAddress, name: DisplayName, password_hash: String, now: String) -> Self {
-        Self { id, email, name, password_hash, status: AccessUserStatus::Active, created_at: now.clone(), updated_at: now, version: 1 }
+    pub fn new(
+        id: String,
+        email: EmailAddress,
+        name: DisplayName,
+        password_hash: String,
+        now: String,
+    ) -> Self {
+        Self {
+            id,
+            email,
+            name,
+            password_hash,
+            status: AccessUserStatus::Active,
+            created_at: now.clone(),
+            updated_at: now,
+            version: 1,
+        }
     }
 }

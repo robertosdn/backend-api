@@ -91,6 +91,44 @@ A reindexacao do Elasticsearch a partir do MySQL e uma operacao de infraestrutur
 
 Os modulos abaixo sao requisitos de implementacao e devem ser criados como arquivos/diretorios Rust proprios. A lista nao e somente uma referencia conceitual.
 
+### Organizacao Por Agregado
+
+Arquivos que pertencem diretamente ao agregado `AccessUser` devem ficar agrupados em subdiretorios `access_user` dentro da camada responsavel, evitando poluir a pasta com arquivos de outros agregados. A organizacao esperada inclui:
+
+```text
+src/
+  domain/
+    access_user.rs
+    access_user/
+      events.rs
+      status.rs
+      value_objects.rs
+  application/
+    commands/
+      access_user.rs
+      access_user/
+        create_access_user.rs
+    queries/
+      access_user.rs
+      access_user/
+        get_access_user.rs
+        list_access_users.rs
+  repositories/
+    access_user.rs
+    access_user/
+      access_user_read_repository.rs
+      access_user_write_repository.rs
+  outbox/
+    outbox_record.rs
+    processor.rs
+    access_user.rs
+    access_user/
+      for_access_user_created.rs
+      for_access_user_updated.rs
+```
+
+O mesmo criterio deve ser aplicado a novos agregados e componentes de dominio. `outbox/outbox_record.rs` e `outbox/processor.rs` permanecem na camada transversal; o modulo `outbox/access_user/` concentra os construtores de eventos especificos desse agregado. O arquivo raiz `outbox/access_user.rs` declara esses submodulos; nao devem ser criados arquivos `mod.rs` apenas para formar agrupamentos.
+
 A implementacao deve seguir a divisao em modulos para preservar baixo acoplamento e manter a regra do projeto:
 
 - `domain`: entidades, value objects, enums e regras internas. Ex.: `AccessUser`, `AccessUserStatus`, `EmailAddress`, `UserId`, `PasswordHash`.
@@ -100,6 +138,16 @@ A implementacao deve seguir a divisao em modulos para preservar baixo acoplament
 - `outbox`: entidade de evento transacional e processador com retry, backoff, idempotencia e observabilidade.
 - `auth`: validacao de senha, emissao e validacao de token, e middleware para autorização por papel.
 - `http`: DTOs, handlers e rotas, sem logica de dominio embutida.
+
+### Convencao De Arquivos Rust
+
+Arquivos `mod.rs` devem conter somente a declaracao e, quando necessario, o reexport dos submodulos. A implementacao de uma classe, struct ou componente principal deve ficar em um arquivo com nome `snake_case` correspondente a sua responsabilidade. Na infraestrutura, por exemplo, `MySqlAccessUserRepository` fica em `infrastructure/mysql/mysql_access_user_repository.rs`, `ElasticsearchAccessUserReadRepository` em `infrastructure/elasticsearch/elasticsearch_access_user_read_repository.rs`, `RabbitMqEventPublisher` em `infrastructure/rabbitmq/rabbitmq_event_publisher.rs` e `RedisSessionStore` em `infrastructure/redis/redis_session_store.rs`.
+
+Os nomes de funcoes e metodos devem refletir a operacao ou o evento de dominio que executam, com especificidade suficiente para nao confundir responsabilidades. Nao usar nomes genericos baseados apenas na entidade, como `for_user`, quando o metodo representa um evento concreto. Por exemplo, o construtor de `OutboxRecord` que cria o payload `AccessUserCreated` deve se chamar `for_access_user_created`.
+
+Quando uma entidade ou componente crescer, cada funcao com responsabilidade de dominio propria deve ficar em um arquivo `snake_case` proprio. Cada arquivo pode conter somente o bloco `impl` necessario para associar aquela funcao ao tipo; funcoes diferentes nao devem ser acumuladas no mesmo arquivo ou bloco `impl`. Por exemplo, a implementacao de `OutboxRecord::for_access_user_created` fica em `outbox/access_user/for_access_user_created.rs`, enquanto `outbox/outbox_record.rs` permanece reservado ao modelo `OutboxRecord` e seus estados.
+
+Para o evento `AccessUserUpdated`, o mesmo padrao exige `OutboxRecord::for_access_user_updated` em `outbox/access_user/for_access_user_updated.rs`. Eventos diferentes devem possuir payloads de dominio diferentes, mesmo quando compartilham os mesmos campos, e a outbox deve aceitar ambos sem alterar o contrato JSON dos payloads.
 
 `src/app.rs` fica fora desses limites como ponto de composicao da aplicacao. Ele pode registrar rotas e montar dependencias, mas nao pode implementar validacao, hash, regras de usuario, persistencia, outbox ou armazenamento de estado. O endpoint de criacao somente sera considerado implementado quando respeitar o encadeamento `http -> application/commands -> domain -> repositories/outbox`.
 

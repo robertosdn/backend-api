@@ -1,4 +1,4 @@
-use backend_api::domain::{access_user::AccessUser, value_objects::{DisplayName, EmailAddress}};
+use backend_api::domain::access_user::{value_objects::{DisplayName, EmailAddress}, AccessUser};
 
 #[test]
 fn creates_active_access_user_with_initial_version() {

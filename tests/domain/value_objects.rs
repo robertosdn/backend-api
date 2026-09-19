@@ -1,4 +1,6 @@
-use backend_api::domain::value_objects::{validate_password_policy, DisplayName, EmailAddress};
+use backend_api::domain::access_user::value_objects::{
+    validate_password_policy, DisplayName, EmailAddress,
+};
 
 #[test]
 fn normalizes_email_and_validates_name_and_password() {

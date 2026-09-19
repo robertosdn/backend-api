@@ -31,6 +31,10 @@ src/
   outbox/
     outbox_record.rs
     processor.rs
+    access_user.rs
+    access_user/
+      for_access_user_created.rs
+      for_access_user_updated.rs
   auth/
     jwt.rs
     password_hash.rs

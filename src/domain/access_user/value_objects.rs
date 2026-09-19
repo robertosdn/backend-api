@@ -8,7 +8,9 @@ impl EmailAddress {
         let normalized = value.trim().to_ascii_lowercase();
         let at = normalized.find('@');
         let dot = normalized.rfind('.');
-        if normalized.len() > 254 || !matches!((at, dot), (Some(at_idx), Some(dot_idx)) if at_idx > 0 && dot_idx > at_idx + 1 && dot_idx < normalized.len() - 1) {
+        if normalized.len() > 254
+            || !matches!((at, dot), (Some(at_idx), Some(dot_idx)) if at_idx > 0 && dot_idx > at_idx + 1 && dot_idx < normalized.len() - 1)
+        {
             return Err("invalid email");
         }
         Ok(Self(normalized))

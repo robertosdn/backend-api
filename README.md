@@ -52,6 +52,8 @@ docker compose --profile test build rest-test
 docker compose --profile test run --rm rest-test
 ```
 
+O servico `rest-test` executa testes unitarios isoladamente e nao inicia MySQL, RabbitMQ, Elasticsearch ou Redis.
+
 A API atual fica disponivel em `http://localhost:8080`.
 
 ### Bootstrap no Docker Compose

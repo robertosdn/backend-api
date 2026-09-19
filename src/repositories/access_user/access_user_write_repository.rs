@@ -12,7 +12,11 @@ pub enum WriteRepositoryError {
 
 #[async_trait]
 pub trait AccessUserWriteRepository: Send + Sync {
-    async fn save_user_and_event(&self, user: AccessUser, event: OutboxRecord) -> Result<(), WriteRepositoryError>;
+    async fn save_user_and_event(
+        &self,
+        user: AccessUser,
+        event: OutboxRecord,
+    ) -> Result<(), WriteRepositoryError>;
 }
 
 #[derive(Default)]
@@ -32,19 +36,36 @@ impl InMemoryAccessUserRepository {
     }
 
     pub fn user_count(&self) -> usize {
-        self.state.lock().map(|state| state.users.len()).unwrap_or_default()
+        self.state
+            .lock()
+            .map(|state| state.users.len())
+            .unwrap_or_default()
     }
 
     pub fn outbox_count(&self) -> usize {
-        self.state.lock().map(|state| state.outbox.len()).unwrap_or_default()
+        self.state
+            .lock()
+            .map(|state| state.outbox.len())
+            .unwrap_or_default()
     }
 }
 
 #[async_trait]
 impl AccessUserWriteRepository for InMemoryAccessUserRepository {
-    async fn save_user_and_event(&self, user: AccessUser, event: OutboxRecord) -> Result<(), WriteRepositoryError> {
-        let mut state = self.state.lock().map_err(|_| WriteRepositoryError::Storage)?;
-        if state.users.iter().any(|existing| existing.email == user.email) {
+    async fn save_user_and_event(
+        &self,
+        user: AccessUser,
+        event: OutboxRecord,
+    ) -> Result<(), WriteRepositoryError> {
+        let mut state = self
+            .state
+            .lock()
+            .map_err(|_| WriteRepositoryError::Storage)?;
+        if state
+            .users
+            .iter()
+            .any(|existing| existing.email == user.email)
+        {
             return Err(WriteRepositoryError::DuplicateEmail);
         }
         state.users.push(user);

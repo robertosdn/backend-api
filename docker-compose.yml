@@ -112,15 +112,6 @@ services:
       context: .
       target: test
     container_name: backend-api-test
-    depends_on:
-      mysql:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     profiles:
       - test
 
