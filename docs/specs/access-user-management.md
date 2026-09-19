@@ -197,6 +197,20 @@ Isso garante consistencia entre estado e integraçao, sem permitir que o usuario
 
 ## Testes Obrigatorios
 
+Os testes devem ser mantidos no diretorio `tests/`, segmentados por responsabilidade. A suite nao deve ficar concentrada em `src/tests.rs`.
+
+Estrutura esperada:
+
+```text
+tests/
+  domain/
+  application/
+  repositories/
+  outbox/
+  http/
+  fixtures/
+```
+
 - Testes unitarios de validacao, normalizacao, senha, transicoes de status e regras de dominio.
 - Testes de command handlers para duplicidade, concorrencia e atomicidade com a outbox.
 - Testes de queries sem efeitos colaterais e sem exposicao de hash.

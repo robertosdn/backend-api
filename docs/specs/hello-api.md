@@ -28,4 +28,4 @@ Os endpoints desta especificacao nao fazem parte do produto final. A remocao dev
 
 ## Testes Atuais
 
-Os fluxos HTTP estao cobertos em `src/tests.rs` por testes de integracao usando o router Axum sem iniciar um processo externo.
+Os fluxos HTTP legados devem ser cobertos em `tests/http/hello.rs` por testes de integracao usando o router Axum sem iniciar um processo externo. Esta cobertura deve ser removida junto com os endpoints de demonstracao.

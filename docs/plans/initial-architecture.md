@@ -44,6 +44,21 @@ src/
     elasticsearch/
     rabbitmq/
     redis/
+tests/
+  domain/
+    access_user.rs
+    value_objects.rs
+  application/
+    commands.rs
+    queries.rs
+  repositories/
+    access_user_write.rs
+  outbox/
+    processor.rs
+  http/
+    access_users.rs
+  fixtures/
+    mod.rs
 ```
 
 ### Contratos esperados
@@ -60,13 +75,15 @@ src/
 
 Para cada endpoint novo, a implementacao deve seguir o fluxo `http -> command -> dominio -> repositorio/outbox`, com contratos definidos em arquivos proprios. O handler HTTP somente desserializa a entrada, chama o command handler e converte o resultado em resposta HTTP. Uma implementacao nao pode ser aceita se regras de dominio ou persistencia estiverem concentradas em `app.rs`, `http/handlers.rs` ou em um unico arquivo monolitico.
 
+Os testes tambem devem seguir a separacao modular. O diretorio `tests/` e obrigatorio para a suite principal, com arquivos separados para dominio, commands/queries, repositorios, outbox e HTTP. Um arquivo unico `src/tests.rs` nao atende ao plano. Testes unitarios internos com `#[cfg(test)]` sao permitidos quando necessarios para acessar detalhes privados, mas nao substituem os testes segmentados em `tests/`.
+
 ## Etapas
 
 1. Fechar as decisoes em aberto da especificacao de gestao de usuarios, incluindo banco, credencial, hash, autorizacao e destino de eventos.
 2. Escolher banco de dados e crate de acesso, documentando a decisao arquitetural.
 3. Criar modulos separados para dominio, commands, queries, repositorios, autenticacao, outbox e handlers HTTP.
 4. Criar o modelo da outbox e a unidade transacional que grava usuario e evento atomicamente.
-5. Implementar criacao, alteracao e consultas de usuarios com testes unitarios e de integracao.
+5. Implementar criacao, alteracao e consultas de usuarios com testes unitarios e de integracao segmentados em `tests/` por camada.
 6. Implementar login com verificacao segura de senha, credencial de sessao/token e respostas que evitem enumeracao.
 7. Implementar o processador da outbox com retry, backoff, idempotencia e observabilidade, com selecao de eventos pendentes, tentativa de publicacao no RabbitMQ, marcacao de erro e reprocessamento controlado.
 8. Implementar o projetor RabbitMQ -> Elasticsearch para materializar o read model dos usuarios sem consultas ao MySQL em queries normais.
@@ -74,7 +91,7 @@ Para cada endpoint novo, a implementacao deve seguir o fluxo `http -> command ->
 10. Atualizar Docker Compose com banco e demais dependencias necessarias, aplicar migracoes SQL em bootstrap e validar pelo perfil de testes.
 11. Remover `hello` e `echo` do router e retirar seus testes somente apos os endpoints reais estarem cobertos.
 
-Em cada etapa de implementacao, a revisao deve verificar a arvore de arquivos, os limites de dependencia entre modulos e a existencia de testes da camada alterada. A tarefa so pode ser marcada como concluida quando essa verificacao passar.
+Em cada etapa de implementacao, a revisao deve verificar a arvore de arquivos, os limites de dependencia entre modulos e a existencia de testes da camada alterada no diretorio `tests/`. A tarefa so pode ser marcada como concluida quando essa verificacao passar.
 
 ## Nao Escopo
 
@@ -88,3 +105,5 @@ Em cada etapa de implementacao, a revisao deve verificar a arvore de arquivos, o
 A primeira feature deve permitir criar, alterar, consultar e autenticar usuarios de acesso, demonstrar que a alteracao de estado e o evento da outbox sao confirmados juntos e remover os endpoints de demonstracao sem reduzir a cobertura de testes. O backend deve permanecer preparado para novas features de negocio.
 
 O criterio de saida inclui a estrutura modular prevista: dominio, commands, queries, repositorios, outbox, autenticacao e HTTP devem estar separados em modulos proprios, com `app.rs` contendo somente a montagem do router.
+
+Tambem inclui uma suite de testes segmentada em `tests/`, sem concentrar os testes em `src/tests.rs` ou em um arquivo monolitico.

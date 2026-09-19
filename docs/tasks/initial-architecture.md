@@ -25,7 +25,7 @@
 
 ## Endpoints E Casos De Uso
 
-- [ ] Criar a estrutura modular fisica prevista em `docs/plans/initial-architecture.md` antes dos endpoints: `domain`, `application/commands`, `application/queries`, `repositories`, `outbox`, `auth`, `http` e `infrastructure`.
+- [x] Criar a estrutura modular fisica prevista em `docs/plans/initial-architecture.md` antes dos endpoints: `domain`, `application/commands`, `application/queries`, `repositories`, `outbox`, `auth`, `http` e `infrastructure`.
 - [ ] Implementar `POST /api/v1/access-users` seguindo `http -> command -> dominio -> repositorio/outbox`, com validacao de email, nome e senha; email unico, hash Argon2id, evento transacional na outbox e resposta sem `password_hash`.
 - [ ] Implementar `PATCH /api/v1/access-users/{id}`.
 - [ ] Implementar `GET /api/v1/access-users/{id}`.
@@ -35,13 +35,14 @@
 
 ## Testes E Retirada
 
-- [ ] Verificar que `src/app.rs` contem somente composicao do router e registro de rotas, sem regras de dominio, hash, persistencia ou estado de usuarios.
-- [ ] Adicionar testes unitarios e de integracao por modulo, cobrindo o fluxo HTTP, command handler, dominio e unidade transacional usuario/outbox.
-- [ ] Adicionar testes unitarios de dominio, validacao, senha e transicoes de status.
-- [ ] Adicionar testes de commands, queries, concorrencia e atomicidade com a outbox.
-- [ ] Adicionar testes de login valido, invalido, inexistente e usuario desabilitado.
-- [ ] Adicionar testes HTTP dos endpoints e codigos de erro.
-- [ ] Adicionar testes de retry e reprocessamento apos falha de publicacao.
+- [x] Verificar que `src/app.rs` contem somente composicao do router e registro de rotas, sem regras de dominio, hash, persistencia ou estado de usuarios.
+- [ ] Criar o diretorio `tests/` e segmentar a suite em `domain/`, `application/`, `repositories/`, `outbox/`, `http/` e `fixtures/`.
+- [ ] Remover a concentracao da suite em `src/tests.rs`; nenhum arquivo monolitico de testes deve permanecer.
+- [ ] Adicionar testes de dominio em `tests/domain/` para validacao, normalizacao, senha e transicoes de status.
+- [ ] Adicionar testes de commands e queries em `tests/application/`, cobrindo concorrencia e regras sem efeitos colaterais.
+- [ ] Adicionar testes de repositorios em `tests/repositories/`, incluindo unicidade e atomicidade com a outbox.
+- [ ] Adicionar testes do processador em `tests/outbox/`, cobrindo retry, backoff e reprocessamento apos falha de publicacao.
+- [ ] Adicionar testes HTTP em `tests/http/`, cobrindo endpoints, codigos de erro, login valido, invalido, inexistente e usuario desabilitado.
 - [ ] Adicionar testes de queries por id, filtros, paginacao e busca no Elasticsearch.
 - [ ] Adicionar teste de falha do Elasticsearch sem fallback para MySQL.
 - [ ] Adicionar MySQL, RabbitMQ, Elasticsearch e Redis ao Docker Compose com health checks e executar formatacao, testes e clippy dentro do Docker.
