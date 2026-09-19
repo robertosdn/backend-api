@@ -31,3 +31,37 @@ async fn creates_access_user_with_valid_data_and_hides_password_hash() {
     assert!(!body.contains("password_hash"));
     assert!(!body.contains(fixtures::VALID_PASSWORD));
 }
+
+#[tokio::test]
+async fn rejects_duplicate_email_and_invalid_payloads() {
+    let router = app();
+    let payload = format!(
+        r#"{{"name":"Alice Silva","email":"{}","password":"{}"}}"#,
+        fixtures::VALID_EMAIL,
+        fixtures::VALID_PASSWORD,
+    );
+
+    let first = Request::builder()
+        .method("POST")
+        .uri("/api/v1/access-users")
+        .header("content-type", "application/json")
+        .body(Body::from(payload.clone()))
+        .unwrap();
+    assert_eq!(router.clone().oneshot(first).await.unwrap().status(), StatusCode::CREATED);
+
+    let duplicate = Request::builder()
+        .method("POST")
+        .uri("/api/v1/access-users")
+        .header("content-type", "application/json")
+        .body(Body::from(payload))
+        .unwrap();
+    assert_eq!(router.clone().oneshot(duplicate).await.unwrap().status(), StatusCode::CONFLICT);
+
+    let invalid = Request::builder()
+        .method("POST")
+        .uri("/api/v1/access-users")
+        .header("content-type", "application/json")
+        .body(Body::from(r#"{"name":"","email":"bad","password":"weak"}"#))
+        .unwrap();
+    assert_eq!(router.oneshot(invalid).await.unwrap().status(), StatusCode::BAD_REQUEST);
+}

@@ -83,15 +83,15 @@ Os testes tambem devem seguir a separacao modular. O diretorio `tests/` e obriga
 2. Escolher banco de dados e crate de acesso, documentando a decisao arquitetural.
 3. Criar modulos separados para dominio, commands, queries, repositorios, autenticacao, outbox e handlers HTTP.
 4. Criar o modelo da outbox e a unidade transacional que grava usuario e evento atomicamente.
-5. Implementar criacao, alteracao e consultas de usuarios com testes unitarios e de integracao segmentados em `tests/` por camada.
+5. Implementar criacao, alteracao e consultas de usuarios com MySQL/Elasticsearch reais e testes unitarios e de integracao segmentados em `tests/` por camada.
 6. Implementar login com verificacao segura de senha, credencial de sessao/token e respostas que evitem enumeracao.
 7. Implementar o processador da outbox com retry, backoff, idempotencia e observabilidade, com selecao de eventos pendentes, tentativa de publicacao no RabbitMQ, marcacao de erro e reprocessamento controlado.
 8. Implementar o projetor RabbitMQ -> Elasticsearch para materializar o read model dos usuarios sem consultas ao MySQL em queries normais.
 9. Implementar reindexacao de emergencia do Elasticsearch a partir do MySQL em batch, mantendo o caminho normal das queries somente no Elasticsearch.
-10. Atualizar Docker Compose com banco e demais dependencias necessarias, aplicar migracoes SQL em bootstrap e validar pelo perfil de testes.
+10. Atualizar Docker Compose com banco e demais dependencias necessarias, aplicar migracoes SQL em bootstrap e validar os endpoints contra a infraestrutura real pelo perfil de testes.
 11. Remover `hello` e `echo` do router e retirar seus testes somente apos os endpoints reais estarem cobertos.
 
-Em cada etapa de implementacao, a revisao deve verificar a arvore de arquivos, os limites de dependencia entre modulos e a existencia de testes da camada alterada no diretorio `tests/`. A tarefa so pode ser marcada como concluida quando essa verificacao passar.
+Em cada etapa de implementacao, a revisao deve verificar a arvore de arquivos, os limites de dependencia entre modulos, a infraestrutura efetivamente usada pelo runtime e a existencia de testes da camada alterada no diretorio `tests/`. A tarefa so pode ser marcada como concluida quando essa verificacao passar; mocks em memoria nao substituem MySQL, RabbitMQ ou Elasticsearch nos fluxos de integracao.
 
 ## Nao Escopo
 

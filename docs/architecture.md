@@ -38,6 +38,8 @@ A tabela ou armazenamento da outbox deve conter, no minimo, identificador do eve
 
 Um processador separado busca eventos pendentes, publica cada evento no RabbitMQ e marca o registro como processado. O processamento deve ter retry, backoff, idempotencia e observabilidade. A publicacao deve ser at-least-once; consumidores precisam aceitar duplicatas.
 
+Os adaptadores de producao devem usar MySQL/InnoDB e RabbitMQ reais. Implementacoes em memoria sao permitidas somente para testes unitarios e nao podem ser conectadas ao router de runtime como substitutas da infraestrutura final.
+
 ### Redis Temporario
 
 Redis nao participa do read model de CQRS. Deve ser usado somente para sessoes, tokens revogados, rate limiting e outros dados temporarios com TTL explicito. MySQL continua sendo o write model e Elasticsearch o read model.

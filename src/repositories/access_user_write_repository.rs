@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use crate::{domain::{access_user::AccessUser, value_objects::EmailAddress, events::AccessUserCreated}, outbox::outbox_record::OutboxRecord};
+use crate::{domain::{access_user::AccessUser, events::AccessUserCreated}, outbox::outbox_record::OutboxRecord};
 
 #[derive(Debug)]
 pub enum WriteRepositoryError {
@@ -13,9 +13,14 @@ pub trait AccessUserWriteRepository: Send + Sync {
 }
 
 #[derive(Default)]
+struct RepositoryState {
+    users: Vec<AccessUser>,
+    outbox: Vec<OutboxRecord>,
+}
+
+#[derive(Default)]
 pub struct InMemoryAccessUserRepository {
-    pub users: Mutex<Vec<AccessUser>>,
-    pub outbox: Mutex<Vec<OutboxRecord>>,
+    state: Mutex<RepositoryState>,
 }
 
 impl InMemoryAccessUserRepository {
@@ -27,21 +32,24 @@ impl InMemoryAccessUserRepository {
         let payload = AccessUserCreated { event_id: event_id.clone(), aggregate_id: user.id.clone(), event_type: "AccessUserCreated", email: user.email.to_string(), name: user.name.as_str().to_owned(), status: "active", version: user.version };
         OutboxRecord { id: event_id, aggregate_id: user.id.clone(), event_type: "AccessUserCreated".to_owned(), payload, status: crate::outbox::outbox_record::OutboxStatus::Pending }
     }
+
+    pub fn user_count(&self) -> usize {
+        self.state.lock().map(|state| state.users.len()).unwrap_or_default()
+    }
+
+    pub fn outbox_count(&self) -> usize {
+        self.state.lock().map(|state| state.outbox.len()).unwrap_or_default()
+    }
 }
 
 impl AccessUserWriteRepository for InMemoryAccessUserRepository {
     fn save_user_and_event(&self, user: AccessUser, event: OutboxRecord) -> Result<(), WriteRepositoryError> {
-        let mut users = self.users.lock().map_err(|_| WriteRepositoryError::Storage)?;
-        if users.iter().any(|existing| existing.email == user.email) {
+        let mut state = self.state.lock().map_err(|_| WriteRepositoryError::Storage)?;
+        if state.users.iter().any(|existing| existing.email == user.email) {
             return Err(WriteRepositoryError::DuplicateEmail);
         }
-        let mut outbox = self.outbox.lock().map_err(|_| WriteRepositoryError::Storage)?;
-        users.push(user);
-        outbox.push(event);
+        state.users.push(user);
+        state.outbox.push(event);
         Ok(())
     }
-}
-
-pub fn email_exists(_email: &EmailAddress) -> bool {
-    false
 }
