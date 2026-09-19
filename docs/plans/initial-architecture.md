@@ -14,20 +14,27 @@ A estrutura inicial do backend deve seguir a separacao abaixo, mantendo CQRS e a
 src/
   domain/
     access_user.rs
-    access_user_status.rs
-    events.rs
-    value_objects.rs
+    access_user/
+      events.rs
+      status.rs
+      value_objects.rs
   application/
     commands/
-      create_access_user.rs
-      update_access_user.rs
-      login_access_user.rs
+      access_user.rs
+      access_user/
+        create_access_user.rs
+        update_access_user.rs
+        login_access_user.rs
     queries/
-      get_access_user.rs
-      list_access_users.rs
+      access_user.rs
+      access_user/
+        get_access_user.rs
+        list_access_users.rs
   repositories/
-    access_user_write_repository.rs
-    access_user_read_repository.rs
+    access_user.rs
+    access_user/
+      access_user_write_repository.rs
+      access_user_read_repository.rs
   outbox/
     outbox_record.rs
     processor.rs
