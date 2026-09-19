@@ -6,6 +6,8 @@ Substituir os endpoints de demonstracao `hello` e `echo` pelas primeiras feature
 
 ## Contratos E Modulos Previstos
 
+Esta estrutura e obrigatoria para a implementacao, nao apenas uma sugestao de organizacao. Cada responsabilidade deve existir no modulo indicado antes de a etapa correspondente ser marcada como concluida. `src/app.rs` deve permanecer limitado a composicao do router e registro de rotas; ele nao pode conter entidades, value objects, regras de validacao, hash de senha, acesso a repositorios, armazenamento de estado ou orquestracao de commands.
+
 A estrutura inicial do backend deve seguir a separacao abaixo, mantendo CQRS e a outbox transacional:
 
 ```text
@@ -54,6 +56,10 @@ src/
 - Repositórios de leitura consultam o Elasticsearch e nunca fazem fallback para MySQL em consultas normais.
 - Autenticacao e autorizacao sao camadas separadas: login valida senha e emissao de token; middleware/guard valida `sub`, `role` e escopos por request.
 
+### Regra de implementacao
+
+Para cada endpoint novo, a implementacao deve seguir o fluxo `http -> command -> dominio -> repositorio/outbox`, com contratos definidos em arquivos proprios. O handler HTTP somente desserializa a entrada, chama o command handler e converte o resultado em resposta HTTP. Uma implementacao nao pode ser aceita se regras de dominio ou persistencia estiverem concentradas em `app.rs`, `http/handlers.rs` ou em um unico arquivo monolitico.
+
 ## Etapas
 
 1. Fechar as decisoes em aberto da especificacao de gestao de usuarios, incluindo banco, credencial, hash, autorizacao e destino de eventos.
@@ -68,6 +74,8 @@ src/
 10. Atualizar Docker Compose com banco e demais dependencias necessarias, aplicar migracoes SQL em bootstrap e validar pelo perfil de testes.
 11. Remover `hello` e `echo` do router e retirar seus testes somente apos os endpoints reais estarem cobertos.
 
+Em cada etapa de implementacao, a revisao deve verificar a arvore de arquivos, os limites de dependencia entre modulos e a existencia de testes da camada alterada. A tarefa so pode ser marcada como concluida quando essa verificacao passar.
+
 ## Nao Escopo
 
 - Nao manter `hello` e `echo` como parte do contrato final da API.
@@ -78,3 +86,5 @@ src/
 ## Criterio De Saida
 
 A primeira feature deve permitir criar, alterar, consultar e autenticar usuarios de acesso, demonstrar que a alteracao de estado e o evento da outbox sao confirmados juntos e remover os endpoints de demonstracao sem reduzir a cobertura de testes. O backend deve permanecer preparado para novas features de negocio.
+
+O criterio de saida inclui a estrutura modular prevista: dominio, commands, queries, repositorios, outbox, autenticacao e HTTP devem estar separados em modulos proprios, com `app.rs` contendo somente a montagem do router.

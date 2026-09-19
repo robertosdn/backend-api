@@ -1,0 +1,24 @@
+# Rust build artifacts from the host
+target/
+
+# Git and local tooling
+.git/
+.github/
+.vscode/
+.idea/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and temporary files
+*.log
+*.pid
+.DS_Store
+Thumbs.db
+
+# Documentation is not required by the Docker build context
+README.md
+AGENTS.md
+docs/

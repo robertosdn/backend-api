@@ -25,7 +25,8 @@
 
 ## Endpoints E Casos De Uso
 
-- [ ] Implementar `POST /api/v1/access-users` com validacao de email, nome e senha; email unico, hash Argon2id, evento transacional na outbox e resposta sem `password_hash`.
+- [ ] Criar a estrutura modular fisica prevista em `docs/plans/initial-architecture.md` antes dos endpoints: `domain`, `application/commands`, `application/queries`, `repositories`, `outbox`, `auth`, `http` e `infrastructure`.
+- [ ] Implementar `POST /api/v1/access-users` seguindo `http -> command -> dominio -> repositorio/outbox`, com validacao de email, nome e senha; email unico, hash Argon2id, evento transacional na outbox e resposta sem `password_hash`.
 - [ ] Implementar `PATCH /api/v1/access-users/{id}`.
 - [ ] Implementar `GET /api/v1/access-users/{id}`.
 - [ ] Implementar `GET /api/v1/access-users` com paginacao.
@@ -34,6 +35,8 @@
 
 ## Testes E Retirada
 
+- [ ] Verificar que `src/app.rs` contem somente composicao do router e registro de rotas, sem regras de dominio, hash, persistencia ou estado de usuarios.
+- [ ] Adicionar testes unitarios e de integracao por modulo, cobrindo o fluxo HTTP, command handler, dominio e unidade transacional usuario/outbox.
 - [ ] Adicionar testes unitarios de dominio, validacao, senha e transicoes de status.
 - [ ] Adicionar testes de commands, queries, concorrencia e atomicidade com a outbox.
 - [ ] Adicionar testes de login valido, invalido, inexistente e usuario desabilitado.
@@ -44,3 +47,7 @@
 - [ ] Adicionar MySQL, RabbitMQ, Elasticsearch e Redis ao Docker Compose com health checks e executar formatacao, testes e clippy dentro do Docker.
 - [ ] Remover rotas e testes de `hello` e `echo` apos a nova API estar validada.
 - [ ] Atualizar a especificacao, o plano e esta lista com os resultados.
+
+## Gate De Conclusao
+
+Nenhuma tarefa de endpoint pode ser marcada como concluida enquanto a estrutura modular prevista nao existir e enquanto `app.rs` concentrar responsabilidades de dominio, aplicacao ou infraestrutura. A revisao deve conferir os caminhos dos arquivos, os contratos entre camadas e os testes correspondentes.

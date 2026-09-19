@@ -89,6 +89,8 @@ A reindexacao do Elasticsearch a partir do MySQL e uma operacao de infraestrutur
 
 ## Modulos E Contratos
 
+Os modulos abaixo sao requisitos de implementacao e devem ser criados como arquivos/diretorios Rust proprios. A lista nao e somente uma referencia conceitual.
+
 A implementacao deve seguir a divisao em modulos para preservar baixo acoplamento e manter a regra do projeto:
 
 - `domain`: entidades, value objects, enums e regras internas. Ex.: `AccessUser`, `AccessUserStatus`, `EmailAddress`, `UserId`, `PasswordHash`.
@@ -98,6 +100,8 @@ A implementacao deve seguir a divisao em modulos para preservar baixo acoplament
 - `outbox`: entidade de evento transacional e processador com retry, backoff, idempotencia e observabilidade.
 - `auth`: validacao de senha, emissao e validacao de token, e middleware para autorização por papel.
 - `http`: DTOs, handlers e rotas, sem logica de dominio embutida.
+
+`src/app.rs` fica fora desses limites como ponto de composicao da aplicacao. Ele pode registrar rotas e montar dependencias, mas nao pode implementar validacao, hash, regras de usuario, persistencia, outbox ou armazenamento de estado. O endpoint de criacao somente sera considerado implementado quando respeitar o encadeamento `http -> application/commands -> domain -> repositories/outbox`.
 
 Os contratos devem manter um boundary claro: handlers HTTP transformam HTTP em comandos/queries, os handlers de aplicacao executam validacao e dominio, e os repositorios sao a unica troca de dados com MySQL/Elasticsearch/Redis.
 
