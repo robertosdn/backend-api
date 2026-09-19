@@ -36,8 +36,8 @@
 ## Testes E Retirada
 
 - [x] Verificar que `src/app.rs` contem somente composicao do router e registro de rotas, sem regras de dominio, hash, persistencia ou estado de usuarios.
-- [ ] Criar o diretorio `tests/` e segmentar a suite em `domain/`, `application/`, `repositories/`, `outbox/`, `http/` e `fixtures/`.
-- [ ] Remover a concentracao da suite em `src/tests.rs`; nenhum arquivo monolitico de testes deve permanecer.
+- [x] Criar o diretorio `tests/` e segmentar a suite em `domain/`, `application/`, `repositories/`, `outbox/`, `http/` e `fixtures/`.
+- [x] Remover a concentracao da suite em `src/tests.rs`; nenhum arquivo monolitico de testes deve permanecer.
 - [ ] Adicionar testes de dominio em `tests/domain/` para validacao, normalizacao, senha e transicoes de status.
 - [ ] Adicionar testes de commands e queries em `tests/application/`, cobrindo concorrencia e regras sem efeitos colaterais.
 - [ ] Adicionar testes de repositorios em `tests/repositories/`, incluindo unicidade e atomicidade com a outbox.

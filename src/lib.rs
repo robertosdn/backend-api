@@ -8,6 +8,3 @@ pub mod outbox;
 pub mod repositories;
 
 pub use crate::app::app;
-
-#[cfg(test)]
-mod tests;
