@@ -1,9 +1,11 @@
 use axum::{routing::{get, post}, Router};
+use std::sync::Arc;
 
 use crate::http::handlers::{self, AppState};
+use crate::repositories::access_user_write_repository::AccessUserWriteRepository;
 
-pub fn router() -> Router {
-    let state = AppState { access_user_repository: crate::repositories::access_user_write_repository::InMemoryAccessUserRepository::new() };
+pub fn router(repository: Arc<dyn AccessUserWriteRepository>) -> Router {
+    let state = AppState { access_user_repository: repository };
     Router::new()
         .route("/hello", get(handlers::hello))
         .route("/hello/", get(handlers::hello_default))

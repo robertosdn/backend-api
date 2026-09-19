@@ -7,4 +7,4 @@ pub mod infrastructure;
 pub mod outbox;
 pub mod repositories;
 
-pub use crate::app::app;
+pub use crate::app::{app, app_with_repository};

@@ -2,16 +2,16 @@ use std::sync::Arc;
 
 use axum::{body::Bytes, extract::{Json, Path, State}, http::{header, StatusCode}, response::{IntoResponse, Response}};
 
-use crate::{application::commands::create_access_user::{CreateAccessUser, CreateAccessUserError, CreateAccessUserInput}, http::dto::{AccessUserResponse, CreateAccessUserRequest}, repositories::access_user_write_repository::InMemoryAccessUserRepository};
+use crate::{application::commands::create_access_user::{CreateAccessUser, CreateAccessUserError, CreateAccessUserInput}, http::dto::{AccessUserResponse, CreateAccessUserRequest}, repositories::access_user_write_repository::AccessUserWriteRepository};
 
 #[derive(Clone)]
 pub struct AppState {
-    pub access_user_repository: Arc<InMemoryAccessUserRepository>,
+    pub access_user_repository: Arc<dyn AccessUserWriteRepository>,
 }
 
 pub async fn create_access_user(State(state): State<AppState>, Json(payload): Json<CreateAccessUserRequest>) -> Result<impl IntoResponse, (StatusCode, String)> {
     let command = CreateAccessUser::new(state.access_user_repository);
-    let user = command.execute(CreateAccessUserInput { name: payload.name, email: payload.email, password: payload.password }).map_err(map_error)?;
+    let user = command.execute(CreateAccessUserInput { name: payload.name, email: payload.email, password: payload.password }).await.map_err(map_error)?;
     Ok((StatusCode::CREATED, [(header::CONTENT_TYPE, "application/json")], Json(AccessUserResponse::from(&user))))
 }
 

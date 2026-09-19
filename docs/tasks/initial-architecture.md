@@ -3,7 +3,7 @@
 ## Decisoes E Fundacao
 
 - [x] Registrar MySQL/InnoDB, `utf8mb4` e estrategia de migracao.
-- [ ] Escolher e registrar os crates de persistencia MySQL e AMQP/RabbitMQ na ADR da implementacao.
+- [x] Escolher e registrar `sqlx` para persistencia MySQL; manter a escolha do crate AMQP/RabbitMQ pendente ate a task do publisher.
 - [x] Registrar formato da credencial, algoritmo de hash e politica de autorizacao.
 - [x] Registrar RabbitMQ como broker e Redis para sessoes e dados temporarios.
 - [x] Registrar Elasticsearch como read model exclusivo das queries.
@@ -15,7 +15,7 @@
 
 - [x] Criar migracao/tabela de usuarios sem armazenar senha em texto puro.
 - [x] Criar tabela transacional de outbox por tabela de dominio, com status, tentativas e timestamps.
-- [ ] Implementar unidade transacional real no MySQL/InnoDB para usuario e evento da outbox.
+- [x] Implementar unidade transacional real no MySQL/InnoDB para usuario e evento da outbox.
 - [x] Documentar e configurar stack Docker Compose para subir infraestrutura e aplicar migrações SQL no bootstrap.
 - [x] Documentar processador da outbox com retry, backoff e idempotencia.
 - [ ] Implementar processador da outbox com retry, backoff e idempotencia usando RabbitMQ real.
@@ -23,12 +23,12 @@
 - [ ] Implementar projetor RabbitMQ -> Elasticsearch usando consumidor RabbitMQ real.
 - [x] Documentar reindexacao do Elasticsearch a partir do MySQL sem usar MySQL no caminho normal das queries.
 - [ ] Implementar reindexacao do Elasticsearch a partir do MySQL sem usar MySQL no caminho normal das queries.
-- [ ] Substituir o `InMemoryAccessUserRepository` por adaptadores reais no runtime; memória deve permanecer restrita a testes.
+- [x] Substituir o `InMemoryAccessUserRepository` por adaptadores reais no runtime; memoria permanece restrita a testes.
 
 ## Endpoints E Casos De Uso
 
 - [x] Criar a estrutura modular fisica prevista em `docs/plans/initial-architecture.md` antes dos endpoints: `domain`, `application/commands`, `application/queries`, `repositories`, `outbox`, `auth`, `http` e `infrastructure`.
-- [ ] Implementar `POST /api/v1/access-users` seguindo `http -> command -> dominio -> repositorio MySQL/outbox`, com validacao de email, nome e senha; email unico, hash Argon2id, evento transacional na outbox e resposta sem `password_hash`.
+- [x] Implementar `POST /api/v1/access-users` seguindo `http -> command -> dominio -> repositorio MySQL/outbox`, com validacao de email, nome e senha; email unico, hash Argon2id, evento transacional na outbox e resposta sem `password_hash`.
 - [ ] Implementar `PATCH /api/v1/access-users/{id}`.
 - [ ] Implementar `GET /api/v1/access-users/{id}`.
 - [ ] Implementar `GET /api/v1/access-users` com paginacao.

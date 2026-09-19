@@ -10,7 +10,7 @@ Aprovada para a primeira implementacao persistente.
 - Storage engine: InnoDB em todas as tabelas de dominio e outbox.
 - Charset: `utf8mb4`.
 - Collation: definir explicitamente por ambiente, preferindo uma collation `utf8mb4` deterministica.
-- Acesso: crate Rust de persistencia a ser registrada na ADR da implementacao.
+- Acesso: `sqlx` com o runtime Tokio e driver MySQL; as queries de escrita usam transacoes explicitas.
 
 > O MySQL possui o charset historico `utf8` limitado a 3 bytes. Para suportar Unicode completo, inclusive emoji, o projeto deve usar `utf8mb4` nas tabelas, conexoes e migracoes.
 
